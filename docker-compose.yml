@@ -62,7 +62,7 @@ services:
 
   recon-api:
     build:
-      context: .
+      context: ./recon-api
       dockerfile: Dockerfile
     container_name: recon-api
     depends_on:
@@ -87,6 +87,8 @@ services:
       LOG_LEVEL: info
     networks:
       - recon-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
@@ -96,7 +98,7 @@ services:
 
   recon-worker:
     build:
-      context: ../recon-worker
+      context: ./recon-worker
       dockerfile: Dockerfile
     container_name: recon-worker
     depends_on:
@@ -125,6 +127,8 @@ services:
       RETRY_BACKOFF_SEC: 2
     networks:
       - recon-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
 networks:
