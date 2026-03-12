@@ -143,7 +143,7 @@ func (h *WebhookHandler) HandleCustodyWebhook(c *gin.Context) {
 
 	// Generate webhook ID from provider data
 	externalID := ""
-	if id, ok := req.Data["tx_hash"].(string); ok {
+	if id, ok := req.Data["txHash"].(string); ok {
 		externalID = id
 	}
 	webhookID := utils.GenerateWebhookID(req.Provider, externalID)

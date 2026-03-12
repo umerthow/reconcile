@@ -27,14 +27,11 @@ type XenditWebhook struct {
 
 // CustodyWebhook represents Custody provider webhook structure
 type CustodyWebhook struct {
-	TxHash      string `json:"tx_hash"`
-	Type        string `json:"type"` // deposit, withdrawal
-	Status      string `json:"status"`
-	Amount      string `json:"amount"` // String to preserve precision
-	Currency    string `json:"currency"`
-	FromAddress string `json:"from_address"`
-	ToAddress   string `json:"to_address"`
-	Timestamp   int64  `json:"timestamp"`
+	TxHash    string `json:"txHash"`
+	Asset     string `json:"asset"`
+	Amount    string `json:"amount"` // String to preserve precision
+	Status    string `json:"status"` // COMPLETED, PENDING, FAILED
+	Timestamp string `json:"timestamp"`
 }
 
 // WebhookResponse represents the webhook response
