@@ -143,6 +143,39 @@ services:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
+  recon-job:
+    build:
+      context: ./recon-job
+      dockerfile: Dockerfile
+    container_name: recon-job
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: recon_user
+      DB_PASSWORD: recon_pass
+      DB_NAME: recon_db
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+      CRON_SCHEDULE: "0 2 * * *"
+      TIMEZONE: "Asia/Jakarta"
+      BATCH_SIZE: 1000
+      CONCURRENCY: 5
+      DISCREPANCY_THRESHOLD: 0.01
+      NOTIFICATION_ENABLED: "false"
+      SLACK_WEBHOOK: ""
+      EMAIL_RECIPIENTS: ""
+      LOG_LEVEL: info
+      GO_ENV: production
+    networks:
+      - recon-network
+    restart: unless-stopped
+
 networks:
   recon-network:
     driver: bridge
