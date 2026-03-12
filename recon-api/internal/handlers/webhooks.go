@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/umerthow/reconcile/recon-api/internal/middleware"
@@ -81,8 +83,13 @@ func (h *WebhookHandler) HandleXenditWebhook(c *gin.Context) {
 		return
 	}
 
-	// Publish to Kafka
-	if err := h.kafka.PublishToXenditTopic(c.Request.Context(), webhookID, req.Data); err != nil {
+	// Publish to Kafka with complete message structure
+	kafkaMessage := map[string]interface{}{
+		"provider":  req.Provider,
+		"timestamp": time.Now().Format(time.RFC3339),
+		"data":      req.Data,
+	}
+	if err := h.kafka.PublishToXenditTopic(c.Request.Context(), webhookID, kafkaMessage); err != nil {
 		log.Error().Err(err).Msg("Failed to publish to Kafka")
 		c.JSON(500, gin.H{
 			"success": false,
@@ -168,8 +175,15 @@ func (h *WebhookHandler) HandleCustodyWebhook(c *gin.Context) {
 		return
 	}
 
+	// Wrap data in complete message structure for worker
+	kafkaMessage := map[string]interface{}{
+		"provider":  req.Provider,
+		"timestamp": time.Now().Format(time.RFC3339),
+		"data":      req.Data,
+	}
+
 	// Publish to Kafka
-	if err := h.kafka.PublishToCustodyTopic(c.Request.Context(), webhookID, req.Data); err != nil {
+	if err := h.kafka.PublishToCustodyTopic(c.Request.Context(), webhookID, kafkaMessage); err != nil {
 		log.Error().Err(err).Msg("Failed to publish to Kafka")
 		c.JSON(500, gin.H{
 			"success": false,

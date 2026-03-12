@@ -81,9 +81,14 @@ func (c *XenditConsumer) processMessage(ctx context.Context, message *sarama.Con
 		Msg("Processing Xendit webhook")
 
 	// Extract webhook ID for deduplication
-	webhookID, ok := webhookMsg.Data["id"].(string)
-	if !ok {
-		webhookID = webhookMsg.Data["external_id"].(string)
+	webhookID := ""
+	if id, ok := webhookMsg.Data["id"].(string); ok {
+		webhookID = id
+	} else if externalID, ok := webhookMsg.Data["external_id"].(string); ok {
+		webhookID = externalID
+	} else {
+		utils.Error().Msg("Missing webhook ID (id or external_id)")
+		return nil // Skip invalid messages
 	}
 
 	// Check deduplication
