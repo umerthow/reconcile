@@ -34,31 +34,39 @@ services:
       timeout: 5s
       retries: 5
 
-  # Note: Kafka is assumed to be running externally on localhost:29092
-  # If you need to add Kafka to this compose file, uncomment below:
-  # zookeeper:
-  #   image: confluentinc/cp-zookeeper:7.5.0
-  #   container_name: recon-zookeeper
-  #   environment:
-  #     ZOOKEEPER_CLIENT_PORT: 2181
-  #     ZOOKEEPER_TICK_TIME: 2000
-  #   networks:
-  #     - recon-network
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: recon-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - recon-network
 
-  # kafka:
-  #   image: confluentinc/cp-kafka:7.5.0
-  #   container_name: recon-kafka
-  #   depends_on:
-  #     - zookeeper
-  #   ports:
-  #     - "29092:29092"
-  #   environment:
-  #     KAFKA_BROKER_ID: 1
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #   networks:
-  #     - recon-network
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: recon-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - recon-network
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   recon-api:
     build:
@@ -69,6 +77,8 @@ services:
       mysql:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     ports:
       - "8080:8080"
@@ -81,7 +91,7 @@ services:
       DB_NAME: recon_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      KAFKA_BROKERS: host.docker.internal:29092
+      KAFKA_BROKERS: kafka:9092
       JWT_SECRET: dev-secret-key-change-in-production-min-32-chars
       ENVIRONMENT: development
       LOG_LEVEL: info
@@ -106,6 +116,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     environment:
       GO_ENV: development
       LOG_LEVEL: info
@@ -116,7 +128,7 @@ services:
       DB_NAME: recon_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      KAFKA_BROKERS: host.docker.internal:29092
+      KAFKA_BROKERS: kafka:9092
       KAFKA_GROUP_ID: recon-worker-group
       KAFKA_SSL_ENABLE: false
       CUSTODY_API_URL: https://api.custody-provider.com
