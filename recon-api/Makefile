@@ -46,8 +46,12 @@ docker-run: ## Run Docker container
 	docker run --rm -p 3000:3000 --env-file .env $(DOCKER_IMAGE)
 
 dev: ## Run in development mode with auto-reload (requires air)
+	@command -v air > /dev/null 2>&1 || { \
+		echo "Air is not installed. Installing..."; \
+		go install github.com/air-verse/air@latest; \
+	}
 	air
 
 install-tools: ## Install development tools
-	go install github.com/cosmtrek/air@latest
+	go install github.com/air-verse/air@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
