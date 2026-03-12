@@ -137,7 +137,11 @@ X-Xendit-Signature: <signature>
   "provider": "xendit",
   "event_type": "payment.succeeded",
   "timestamp": "2024-01-15T10:30:00Z",
-  "payload": { ... }
+  "data": {
+    "id": "txn_123",
+    "amount": 100000,
+    "status": "SUCCEEDED"
+  }
 }
 ```
 
@@ -149,8 +153,14 @@ X-Custody-Signature: <signature>
 {
   "provider": "custody",
   "event_type": "withdrawal.completed",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "payload": { ... }
+  "timestamp": "2024-03-01T09:00:00Z",
+  "data": {
+    "txHash": "0xabc123...",
+    "asset": "USDT",
+    "amount": "250.00",
+    "status": "COMPLETED",
+    "timestamp": "2024-03-01T09:00:00Z"
+  }
 }
 ```
 
