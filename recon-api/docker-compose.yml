@@ -94,6 +94,39 @@ services:
       retries: 3
       start_period: 40s
 
+  recon-worker:
+    build:
+      context: ../recon-worker
+      dockerfile: Dockerfile
+    container_name: recon-worker
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      GO_ENV: development
+      LOG_LEVEL: info
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: recon_user
+      DB_PASSWORD: recon_pass
+      DB_NAME: recon_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKERS: host.docker.internal:29092
+      KAFKA_GROUP_ID: recon-worker-group
+      KAFKA_SSL_ENABLE: false
+      CUSTODY_API_URL: https://api.custody-provider.com
+      CUSTODY_API_KEY: mock-custody-api-key
+      POLLING_INTERVAL_SEC: 300
+      WORKER_CONCURRENCY: 5
+      MAX_RETRIES: 3
+      RETRY_BACKOFF_SEC: 2
+    networks:
+      - recon-network
+    restart: unless-stopped
+
 networks:
   recon-network:
     driver: bridge

@@ -37,3 +37,7 @@ Thumbs.db
 bin/
 dist/
 recon-api
+
+# Air live reload
+tmp/
+build-errors.log

@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+**/bin
+**/tmp
+**/*.log
+**/.env
+**/.env.local
+**/README.md
+**/docker-compose.yml
+**/Dockerfile
+**/*.md
